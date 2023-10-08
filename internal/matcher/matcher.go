@@ -26,8 +26,9 @@ type Matcher struct {
 	matchesFilepath      string
 	messagesFilepath     string
 
-	participants []*participant.Participant
-	matches      map[string][]string
+	participants    []*participant.Participant
+	participantsMap map[string]*participant.Participant
+	matches         map[string][]string
 	// matchCount is how many parallel matches to make.
 	// The value is set by the user for matchCmd and determined from file for generateCmd
 	// Must be at least 1, but less than len(participants) - 1
@@ -44,8 +45,9 @@ type Matcher struct {
 
 func New() *Matcher {
 	return &Matcher{
-		participants: []*participant.Participant{},
-		matches:      map[string][]string{},
+		participants:    []*participant.Participant{},
+		participantsMap: map[string]*participant.Participant{},
+		matches:         map[string][]string{},
 	}
 }
 

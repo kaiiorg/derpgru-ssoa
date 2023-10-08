@@ -11,9 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	MATCH_FILE_HEADER_GIFTER = "gifter"
+)
+
 var (
-	ErrMatchCountTooLow  = errors.New("match count too low")
-	ErrMatchCountTooHigh = errors.New("match count too high")
+	ErrMatchCountTooLow    = errors.New("match count too low")
+	ErrMatchCountTooHigh   = errors.New("match count too high")
+	ErrMatchGifterNotFound = errors.New("giftee in match record not found in participants file")
+	ErrMatchOptionNotFound = errors.New("giftee option in match record not found in participants file")
 )
 
 func (matcher *Matcher) match(cmd *cobra.Command, args []string) error {
@@ -95,7 +101,7 @@ func (matcher *Matcher) matchDoMatching() {
 }
 
 func (matcher *Matcher) matchWriteMatchesHeader(csvWriter *csv.Writer) error {
-	header := []string{"gifter"}
+	header := []string{MATCH_FILE_HEADER_GIFTER}
 	for i := 1; i <= matcher.matchCount; i++ {
 		header = append(header, fmt.Sprintf("option %d", i))
 	}
