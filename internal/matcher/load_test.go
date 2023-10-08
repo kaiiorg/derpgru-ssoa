@@ -1,11 +1,11 @@
 package matcher
 
 import (
-	"testing"
 	"os"
+	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/gocarina/gocsv"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLoad_NoError(t *testing.T) {

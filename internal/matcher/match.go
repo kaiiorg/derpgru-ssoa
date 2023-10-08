@@ -13,7 +13,7 @@ func (matcher *Matcher) match(cmd *cobra.Command, args []string) error {
 }
 
 func (matcher *Matcher) matchShuffle() int {
-	iterations := rand.Int31n(int32(len(matcher.participants) - 1)) + 1 // At least once, but no more than the number of participants minus 1
+	iterations := rand.Int31n(int32(len(matcher.participants)-1)) + 1 // At least once, but no more than the number of participants minus 1
 	log.Trace().
 		Int32("iterations", iterations).
 		Msg("shuffled participant list")

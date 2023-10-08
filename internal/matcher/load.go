@@ -27,12 +27,12 @@ func (matcher *Matcher) load(cmd *cobra.Command, args []string) error {
 
 	// TODO Load the matches
 	/*
-	// We're done if this isn't the generate command
-	if cmd.Use != GENERATE_CMD_NAME {
-		return nil
-	}
+		// We're done if this isn't the generate command
+		if cmd.Use != GENERATE_CMD_NAME {
+			return nil
+		}
 
-	return matcher.loadMatches()
+		return matcher.loadMatches()
 	*/
 }
 

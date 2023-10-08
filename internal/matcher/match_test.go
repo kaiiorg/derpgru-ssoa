@@ -1,8 +1,8 @@
 package matcher
 
 import (
-	"testing"
 	"slices"
+	"testing"
 
 	"github.com/kaiiorg/derpgru-ssoa/internal/models/participant"
 

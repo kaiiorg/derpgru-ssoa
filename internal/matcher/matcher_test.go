@@ -3,14 +3,14 @@ package matcher
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/require"
 )
 
 func testingCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:               "testing",
-		Short:             "Testing command",
+		Use:   "testing",
+		Short: "Testing command",
 	}
 }
 

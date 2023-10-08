@@ -10,29 +10,29 @@ const (
 	MATCH_CMD_NAME    = "match"
 	GENERATE_CMD_NAME = "generate"
 
-	LOG_LEVEL_FLAG = "log-level"
+	LOG_LEVEL_FLAG          = "log-level"
 	PARTICIPANTS_INPUT_FLAG = "in"
-	MATCHES_FLAG = "matches"
-	MESSAGES_FLAG = "messages"
-	EVENT_NAME_FLAG = "name"
-	INDEX_SELECT_FLAG = "select"
+	MATCHES_FLAG            = "matches"
+	MESSAGES_FLAG           = "messages"
+	EVENT_NAME_FLAG         = "name"
+	INDEX_SELECT_FLAG       = "select"
 )
 
 type Matcher struct {
 	logLevel string
 
 	participantsFilepath string
-	matchesFilepath string
-	messagesFilepath string
+	matchesFilepath      string
+	messagesFilepath     string
 
 	participants []*participant.Participant
 
 	// Used with generate command
-	eventName string
+	eventName  string
 	matchIndex int
 
-	rootCmd *cobra.Command
-	matchCmd *cobra.Command
+	rootCmd     *cobra.Command
+	matchCmd    *cobra.Command
 	generateCmd *cobra.Command
 }
 
