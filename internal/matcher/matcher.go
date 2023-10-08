@@ -13,6 +13,7 @@ const (
 	LOG_LEVEL_FLAG          = "log-level"
 	PARTICIPANTS_INPUT_FLAG = "in"
 	MATCHES_FLAG            = "matches"
+	MATCH_COUNT_FLAG        = "count"
 	MESSAGES_FLAG           = "messages"
 	EVENT_NAME_FLAG         = "name"
 	INDEX_SELECT_FLAG       = "select"
@@ -26,6 +27,11 @@ type Matcher struct {
 	messagesFilepath     string
 
 	participants []*participant.Participant
+	matches      map[*participant.Participant][]*participant.Participant
+	// matchCount is how many parallel matches to make.
+	// The value is set by the user for matchCmd and determined from file for generateCmd
+	// Must be at least 1, but less than len(participants) - 1
+	matchCount int
 
 	// Used with generate command
 	eventName  string
@@ -39,6 +45,7 @@ type Matcher struct {
 func New() *Matcher {
 	return &Matcher{
 		participants: []*participant.Participant{},
+		matches:      map[*participant.Participant][]*participant.Participant{},
 	}
 }
 
@@ -60,6 +67,7 @@ func (matcher *Matcher) CobraCommand() *cobra.Command {
 		PreRunE: matcher.load,
 		RunE:    matcher.match,
 	}
+	matcher.matchCmd.Flags().IntVarP(&matcher.matchCount, MATCH_COUNT_FLAG, "c", 3, "How many matches to generate; must be > 1 and < (participant count - 1)")
 	matcher.rootCmd.AddCommand(matcher.matchCmd)
 
 	matcher.generateCmd = &cobra.Command{

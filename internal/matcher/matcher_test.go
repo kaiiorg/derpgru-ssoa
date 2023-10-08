@@ -48,6 +48,8 @@ func TestCobraCommand(t *testing.T) {
 	// matchCmd
 	require.NotNil(t, matcher.matchCmd)
 	require.NotNil(t, matcher.matchCmd.PreRunE)
+	matcherFlags := matcher.matchCmd.Flags()
+	require.NotNilf(t, matcherFlags.Lookup(MATCH_COUNT_FLAG), "Did not find matcher flag '%s'", MATCH_COUNT_FLAG)
 
 	// generateCmd
 	require.NotNil(t, matcher.generateCmd)
