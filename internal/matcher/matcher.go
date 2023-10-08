@@ -37,7 +37,9 @@ type Matcher struct {
 }
 
 func New() *Matcher {
-	return &Matcher{}
+	return &Matcher{
+		participants: []*participant.Participant{},
+	}
 }
 
 func (matcher *Matcher) CobraCommand() *cobra.Command {
