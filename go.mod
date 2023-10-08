@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/gocarina/gocsv v0.0.0-20230616125104-99d496ca653d
+	github.com/google/uuid v1.3.1
 	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
