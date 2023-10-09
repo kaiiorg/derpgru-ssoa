@@ -187,7 +187,7 @@ func TestMatchWriteMatches_CatchesCsvError(t *testing.T) {
 	require.ErrorContains(t, err, "csv: invalid field or comment delimiter")
 }
 
-// compareFunc is used for slices.CompareFunc and will return 0
+// participantCompareFunc is used for slices.CompareFunc and will return 0
 // if the participants provided are the same and 1 if they are not
 func participantCompareFunc(p1, p2 *participant.Participant) int {
 	if p1 == p2 {
