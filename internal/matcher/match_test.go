@@ -74,10 +74,9 @@ func TestMatchShuffle(t *testing.T) {
 	originalOrder := slices.Clone(matcher.participants)
 
 	// Act
-	iterations := matcher.matchShuffle()
+	matcher.matchShuffle()
 
 	// Assert
-	require.NotZero(t, iterations)
 	require.Equal(t, len(originalOrder), len(matcher.participants))
 	require.NotZero(t, slices.CompareFunc(originalOrder, matcher.participants, participantCompareFunc), "participants were not shuffled")
 }
