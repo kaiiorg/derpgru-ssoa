@@ -6,7 +6,7 @@ import (
 
 type Participant struct {
 	Timestamp       string `csv:"Timestamp"`
-	DiscordUsername string `csv:"Discord Username (formatted like kaiiorg#5074)"`
+	DiscordUsername string `csv:"Discord Username"`
 	Address         string `csv:"Shipping Address (include country)"`
 	Name            string `csv:"Shipping Name"`
 	Over21          string `csv:"Are you at least 21 years old?"`
