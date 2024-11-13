@@ -9,6 +9,7 @@ import (
 const (
 	MATCH_CMD_NAME    = "match"
 	GENERATE_CMD_NAME = "generate"
+	FIELDS_CMD_NAME   = "fields"
 
 	LOG_LEVEL_FLAG          = "log-level"
 	PARTICIPANTS_INPUT_FLAG = "in"
@@ -41,6 +42,7 @@ type Matcher struct {
 	rootCmd     *cobra.Command
 	matchCmd    *cobra.Command
 	generateCmd *cobra.Command
+	fieldsCmd   *cobra.Command
 }
 
 func New() *Matcher {
@@ -82,6 +84,13 @@ func (matcher *Matcher) CobraCommand() *cobra.Command {
 	matcher.generateCmd.Flags().IntVarP(&matcher.matchIndex, INDEX_SELECT_FLAG, "s", 0, "Which match pair to use")
 	matcher.generateCmd.MarkFlagRequired(EVENT_NAME_FLAG)
 	matcher.rootCmd.AddCommand(matcher.generateCmd)
+
+	matcher.fieldsCmd = &cobra.Command{
+		Use:   FIELDS_CMD_NAME,
+		Short: "Prints fields expected to be found in CSV files",
+		RunE:  matcher.fields,
+	}
+	matcher.rootCmd.AddCommand(matcher.fieldsCmd)
 
 	return matcher.rootCmd
 }
