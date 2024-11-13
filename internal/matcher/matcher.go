@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	MATCH_CMD_NAME    = "match"
-	GENERATE_CMD_NAME = "generate"
-	FIELDS_CMD_NAME   = "fields"
+	MATCH_CMD_NAME         = "match"
+	GENERATE_CMD_NAME      = "generate"
+	FIELDS_CMD_NAME        = "fields"
+	FIELDS_MODIFY_CMD_NAME = "modify"
 
 	LOG_LEVEL_FLAG          = "log-level"
 	PARTICIPANTS_INPUT_FLAG = "in"
@@ -43,6 +44,7 @@ type Matcher struct {
 	matchCmd    *cobra.Command
 	generateCmd *cobra.Command
 	fieldsCmd   *cobra.Command
+	modifyCmd   *cobra.Command
 }
 
 func New() *Matcher {
@@ -88,9 +90,15 @@ func (matcher *Matcher) CobraCommand() *cobra.Command {
 	matcher.fieldsCmd = &cobra.Command{
 		Use:   FIELDS_CMD_NAME,
 		Short: "Prints fields expected to be found in CSV files",
-		RunE:  matcher.fields,
+		Run:   matcher.fields,
 	}
 	matcher.rootCmd.AddCommand(matcher.fieldsCmd)
+	matcher.modifyCmd = &cobra.Command{
+		Use:   FIELDS_MODIFY_CMD_NAME,
+		Short: "Modifies fields in given CSV file to what is expected",
+		RunE:  matcher.modify,
+	}
+	matcher.fieldsCmd.AddCommand(matcher.modifyCmd)
 
 	return matcher.rootCmd
 }
