@@ -2,6 +2,8 @@ package matcher
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/csv"
 	"fmt"
 	"io"
 	"os"
@@ -47,18 +49,18 @@ func (matcher *Matcher) modify(cmd *cobra.Command, args []string) error {
 	reader := bufio.NewReader(participantsF)
 
 	// Read first line to get the header
-	headerBytes, _, err := reader.ReadLine()
+	header, _, err := reader.ReadLine()
 	if err != nil {
 		return err
 	}
-	header := string(headerBytes)
 
-	// Modify header as needed, save to temp file
+	// Modify header as needed, then write it to temp file
+	header, err = matcher.replaceHeaders(header)
+	if err != nil {
+		return err
+	}
 
-	// TODO actually modify it
-	header += "\n"
-
-	_, err = modifiedF.WriteString(header)
+	_, err = modifiedF.Write(header)
 	if err != nil {
 		return err
 	}
@@ -71,4 +73,44 @@ func (matcher *Matcher) modify(cmd *cobra.Command, args []string) error {
 
 	log.Info().Msg("Modify works")
 	return nil
+}
+
+func (matcher *Matcher) replaceHeaders(rawHeader []byte) ([]byte, error) {
+	// Parse the header as CSV
+	reader := csv.NewReader(bytes.NewBuffer(rawHeader))
+	headers, err := reader.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO load this from file or CLI
+	replacements := map[string]string{
+		"Shipping Address (include country)": "Shipping Address",
+		"Special requests":                   "Special requests or notes (for either your gifter or the henchmen)",
+	}
+
+	// Modify each header as needed
+	resultHeaders := make([]string, len(headers))
+	for i, header := range headers {
+		// Check if this header is in our map of replacements
+		// If it is, use the replacement value
+		// If it isn't, use the current value as is
+		to, found := replacements[header]
+		if found {
+			resultHeaders[i] = to
+		} else {
+			resultHeaders[i] = header
+		}
+	}
+
+	// Write the header back to CSV
+	buffer := bytes.NewBuffer([]byte{})
+	writer := csv.NewWriter(buffer)
+	err = writer.Write(resultHeaders)
+	if err != nil {
+		return nil, err
+	}
+	writer.Flush()
+
+	return buffer.Bytes(), nil
 }
