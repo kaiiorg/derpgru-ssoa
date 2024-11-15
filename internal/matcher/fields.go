@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -16,19 +18,32 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func (matcher *Matcher) fields(cmd *cobra.Command, args []string) {
+func (matcher *Matcher) reflectFields() map[string]string {
+	f := map[string]string{}
 	fields := reflect.VisibleFields(reflect.TypeOf(participant.Participant{}))
 	for _, field := range fields {
 		csvTag, found := field.Tag.Lookup("csv")
 		if !found {
 			continue
 		}
+		f[field.Name] = csvTag
+	}
+	return f
+}
 
-		log.Info().Str("csv", csvTag).Str("field", field.Name).Send()
+func (matcher *Matcher) fields(cmd *cobra.Command, args []string) {
+	fields := matcher.reflectFields()
+	for fieldName, fieldCsv := range fields {
+		log.Info().Str("csv", fieldCsv).Str("field", fieldName).Send()
 	}
 }
 
 func (matcher *Matcher) modify(cmd *cobra.Command, args []string) error {
+	key, err := matcher.loadModifyKeyFromFile()
+	if err != nil {
+		return err
+	}
+
 	// Open new file next to CSV file
 	dir, file := filepath.Split(matcher.participantsFilepath)
 	file = fmt.Sprintf("modified.%s", file)
@@ -55,7 +70,7 @@ func (matcher *Matcher) modify(cmd *cobra.Command, args []string) error {
 	}
 
 	// Modify header as needed, then write it to temp file
-	header, err = matcher.replaceHeaders(header)
+	header, err = matcher.replaceHeaders(key, header)
 	if err != nil {
 		return err
 	}
@@ -71,22 +86,56 @@ func (matcher *Matcher) modify(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	log.Info().Msg("Modify works")
 	return nil
 }
 
-func (matcher *Matcher) replaceHeaders(rawHeader []byte) ([]byte, error) {
+func (matcher *Matcher) loadModifyKeyFromFile() (map[string]string, error) {
+	// Attempt to read from the key file
+	keyJson, err := os.ReadFile(matcher.keyModifyKeyFilepath)
+	if err != nil {
+		// If the error was something other than it doesn't exist, return the error now
+		if !errors.Is(err, os.ErrNotExist) {
+			return nil, err
+		}
+		// Write an example file, then return an error
+		fields := map[string]string{}
+		for _, csvField := range matcher.reflectFields() {
+			fields[csvField] = csvField
+		}
+		keyJson, err = json.MarshalIndent(fields, "", "  ")
+		if err != nil {
+			return nil, errors.Join(
+				errors.New("key file not found"),
+				errors.New("failed to marshal example json"),
+				err,
+			)
+		}
+		err = os.WriteFile(matcher.keyModifyKeyFilepath, keyJson, os.ModePerm)
+		if err != nil {
+			return nil, errors.Join(
+				errors.New("key file not found"),
+				errors.New("failed to write example file"),
+				err,
+			)
+		}
+		return nil, fmt.Errorf("key file not found, wrote example to %s", matcher.keyModifyKeyFilepath)
+	}
+
+	key := map[string]string{}
+	err = json.Unmarshal(keyJson, &key)
+	if err != nil {
+		return nil, err
+	}
+
+	return key, nil
+}
+
+func (matcher *Matcher) replaceHeaders(key map[string]string, rawHeader []byte) ([]byte, error) {
 	// Parse the header as CSV
 	reader := csv.NewReader(bytes.NewBuffer(rawHeader))
 	headers, err := reader.Read()
 	if err != nil {
 		return nil, err
-	}
-
-	// TODO load this from file or CLI
-	replacements := map[string]string{
-		"Shipping Address (include country)": "Shipping Address",
-		"Special requests":                   "Special requests or notes (for either your gifter or the henchmen)",
 	}
 
 	// Modify each header as needed
@@ -95,7 +144,7 @@ func (matcher *Matcher) replaceHeaders(rawHeader []byte) ([]byte, error) {
 		// Check if this header is in our map of replacements
 		// If it is, use the replacement value
 		// If it isn't, use the current value as is
-		to, found := replacements[header]
+		to, found := key[header]
 		if found {
 			resultHeaders[i] = to
 		} else {

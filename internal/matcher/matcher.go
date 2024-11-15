@@ -19,6 +19,7 @@ const (
 	MESSAGES_FLAG           = "messages"
 	EVENT_NAME_FLAG         = "name"
 	INDEX_SELECT_FLAG       = "select"
+	FIELDS_MODIFY_FILE_FLAG = "key"
 )
 
 type Matcher struct {
@@ -27,6 +28,7 @@ type Matcher struct {
 	participantsFilepath string
 	matchesFilepath      string
 	messagesFilepath     string
+	keyModifyKeyFilepath string
 
 	participants    []*participant.Participant
 	participantsMap map[string]*participant.Participant
@@ -94,10 +96,12 @@ func (matcher *Matcher) CobraCommand() *cobra.Command {
 	}
 	matcher.rootCmd.AddCommand(matcher.fieldsCmd)
 	matcher.modifyCmd = &cobra.Command{
-		Use:   FIELDS_MODIFY_CMD_NAME,
-		Short: "Modifies fields in given CSV file to what is expected",
-		RunE:  matcher.modify,
+		Use:          FIELDS_MODIFY_CMD_NAME,
+		Short:        "Modifies fields in given CSV file to what is expected",
+		RunE:         matcher.modify,
+		SilenceUsage: true,
 	}
+	matcher.modifyCmd.Flags().StringVarP(&matcher.keyModifyKeyFilepath, FIELDS_MODIFY_FILE_FLAG, "k", "./pii/modify.key.json", "Modify key file used help modify CSV files to what is expected")
 	matcher.fieldsCmd.AddCommand(matcher.modifyCmd)
 
 	return matcher.rootCmd
