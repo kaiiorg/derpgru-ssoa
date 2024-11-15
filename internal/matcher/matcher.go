@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	MATCH_CMD_NAME    = "match"
-	GENERATE_CMD_NAME = "generate"
+	MATCH_CMD_NAME         = "match"
+	GENERATE_CMD_NAME      = "generate"
+	FIELDS_CMD_NAME        = "fields"
+	FIELDS_MODIFY_CMD_NAME = "modify"
 
 	LOG_LEVEL_FLAG          = "log-level"
 	PARTICIPANTS_INPUT_FLAG = "in"
@@ -17,6 +19,7 @@ const (
 	MESSAGES_FLAG           = "messages"
 	EVENT_NAME_FLAG         = "name"
 	INDEX_SELECT_FLAG       = "select"
+	FIELDS_MODIFY_FILE_FLAG = "key"
 )
 
 type Matcher struct {
@@ -25,6 +28,7 @@ type Matcher struct {
 	participantsFilepath string
 	matchesFilepath      string
 	messagesFilepath     string
+	keyModifyKeyFilepath string
 
 	participants    []*participant.Participant
 	participantsMap map[string]*participant.Participant
@@ -41,6 +45,8 @@ type Matcher struct {
 	rootCmd     *cobra.Command
 	matchCmd    *cobra.Command
 	generateCmd *cobra.Command
+	fieldsCmd   *cobra.Command
+	modifyCmd   *cobra.Command
 }
 
 func New() *Matcher {
@@ -82,6 +88,21 @@ func (matcher *Matcher) CobraCommand() *cobra.Command {
 	matcher.generateCmd.Flags().IntVarP(&matcher.matchIndex, INDEX_SELECT_FLAG, "s", 0, "Which match pair to use")
 	matcher.generateCmd.MarkFlagRequired(EVENT_NAME_FLAG)
 	matcher.rootCmd.AddCommand(matcher.generateCmd)
+
+	matcher.fieldsCmd = &cobra.Command{
+		Use:   FIELDS_CMD_NAME,
+		Short: "Prints fields expected to be found in CSV files",
+		Run:   matcher.fields,
+	}
+	matcher.rootCmd.AddCommand(matcher.fieldsCmd)
+	matcher.modifyCmd = &cobra.Command{
+		Use:          FIELDS_MODIFY_CMD_NAME,
+		Short:        "Modifies fields in given CSV file to what is expected",
+		RunE:         matcher.modify,
+		SilenceUsage: true,
+	}
+	matcher.modifyCmd.Flags().StringVarP(&matcher.keyModifyKeyFilepath, FIELDS_MODIFY_FILE_FLAG, "k", "./pii/modify.key.json", "Modify key file used help modify CSV files to what is expected")
+	matcher.fieldsCmd.AddCommand(matcher.modifyCmd)
 
 	return matcher.rootCmd
 }
